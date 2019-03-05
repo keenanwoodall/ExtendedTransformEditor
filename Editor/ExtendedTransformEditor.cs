@@ -10,7 +10,7 @@ namespace Beans.Unity.ETE
 	{
 		private class Content
 		{
-			public static Texture2D ResetTexture = Resources.Load<Texture2D> (EditorGUIUtility.isProSkin ? "Textures/ETI_Pro_Reset" : "Textures/ETI_Personal_Reset");
+			public static Texture2D ResetTexture = Resources.Load<Texture2D> (EditorGUIUtility.isProSkin ? "Textures/ETE_Pro_Reset" : "Textures/ETE_Personal_Reset");
 
 			public static readonly GUIContent Position	= new GUIContent ("Position", "The local position of this GameObject relative to the parent.");
 			public static readonly GUIContent Rotation	= new GUIContent ("Rotation", "The local rotation of this Game Object relative to the parent.");
@@ -29,7 +29,7 @@ namespace Beans.Unity.ETE
 
 			static Styles ()
 			{
-				Skin = Resources.Load<GUISkin> ("ETI");
+				Skin = Resources.Load<GUISkin> ("ETE");
 				ResetButton = Skin.GetStyle ("button");
 			}
 		}
