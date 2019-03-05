@@ -154,54 +154,76 @@ namespace Beans.Unity.ETE
 		}
 
 		[MenuItem ("CONTEXT/Transform/Set Random Rotation")]
-		private static void RandomRotation ()
+		private static void RandomRotation (MenuCommand command)
 		{
-			Undo.SetCurrentGroupName ("Set Random Rotation");
-			foreach (var transform in GetValidSelectedTransforms ())
-			{
-				Undo.RecordObject (transform, "Set Random Rotation");
-				transform.rotation = Random.rotation;
-			}
+			var transform = command.context as Transform;
+
+			Undo.RecordObject (transform, "Set Random Rotation");
+			transform.rotation = Random.rotation;
 		}
 
-		[MenuItem ("CONTEXT/Transform/Snap to Ground")]
-		private static void SnapToGround ()
+		[MenuItem ("CONTEXT/Transform/Snap to Ground (Bounds)")]
+		private static void SnapToGround (MenuCommand command)
 		{
+			var transform = command.context as Transform;
+
 			Undo.SetCurrentGroupName ("Snapped To Ground");
-			foreach (var transform in GetValidSelectedTransforms ())
+			var origin = transform.position;
+			var mf = transform.GetComponent<MeshFilter> ();
+			if (mf != null)
 			{
-				var origin = transform.position;
-				var mf = transform.GetComponent<MeshFilter> ();
-				if (mf != null)
-				{
-					origin = transform.TransformPoint (mf.sharedMesh.bounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
-				}
-				else
-				{
-					var smr = transform.GetComponent<SkinnedMeshRenderer> ();
-					if (smr != null)
-						origin = transform.TransformPoint (smr.localBounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
-				}
+				origin = transform.TransformPoint (mf.sharedMesh.bounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
+			}
+			else
+			{
+				var smr = transform.GetComponent<SkinnedMeshRenderer> ();
+				if (smr != null)
+					origin = transform.TransformPoint (smr.localBounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
+			}
 
-				Debug.DrawLine (origin, origin + Vector3.forward * 0.1f);
-				Debug.DrawLine (origin, origin + Vector3.up * 0.1f);
-				Debug.DrawLine (origin, origin + Vector3.right * 0.1f);
-
-				RaycastHit hit;
-				if (Physics.Raycast (origin, Vector3.down, out hit))
-				{
-					Undo.RecordObject (transform, "Snapped To Ground");
-					Debug.DrawLine (hit.point, hit.point + Vector3.forward * 0.1f);
-					Debug.DrawLine (hit.point, hit.point + Vector3.up * 0.1f);
-					Debug.DrawLine (hit.point, hit.point + Vector3.right * 0.1f);
-					transform.position += hit.point - origin;
-				}
+			RaycastHit hit;
+			if (Physics.Raycast (origin, Vector3.down, out hit))
+			{
+				Undo.RecordObject (transform, "Snapped To Ground");
+				transform.position += hit.point - origin;
 			}
 		}
 
-		private static IEnumerable<Transform> GetValidSelectedTransforms ()
+		[MenuItem ("CONTEXT/Transform/Snap to Ground (Physics)")]
+		private static void SnapToGroundPhysics (MenuCommand command)
 		{
-			return from selection in Selection.gameObjects where !PrefabUtility.IsPartOfPrefabAsset (selection) select selection.transform;
+			var transform = command.context as Transform;
+
+			Undo.SetCurrentGroupName ("Snapped To Ground");
+			var origin = transform.position;
+
+			RaycastHit hit;
+			if (Physics.Raycast (origin, Vector3.down, out hit))
+			{
+				Undo.RecordObject (transform, "Snapped To Ground");
+
+				transform.position += hit.point - origin;
+
+				var collider = transform.GetComponent<Collider> ();
+				if (collider != null)
+				{
+					var direction = Vector3.up;
+					var distance = 0f;
+					Physics.ComputePenetration
+					(
+						colliderA: collider,
+						positionA: transform.position,
+						rotationA: transform.rotation,
+						colliderB: hit.collider,
+						positionB: hit.transform.position,
+						rotationB: hit.transform.rotation,
+						direction: out direction,
+						distance: out distance
+					);
+
+					transform.position += direction * distance;
+				}
+			}
 		}
 	}
 }
