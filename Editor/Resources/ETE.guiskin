@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 12001, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ETI
+  m_Name: ETE
   m_EditorClassIdentifier: 
   m_Font: {fileID: 0}
   m_box:
