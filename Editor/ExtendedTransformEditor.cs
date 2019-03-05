@@ -102,7 +102,7 @@ namespace Beans.Unity.ETE
 					properties.Scale.vector3Value = Vector3.one;
 			}
 
-			// I can hard code this b/c the transform inspector is always drawn i nthe same spot lmao
+			// I can hard code this b/c the transform inspector is always drawn in the same spot lmao
 			var dragRect = new Rect (16, 105, 47, 10);
 
 			using (var check = new EditorGUI.ChangeCheckScope ())
