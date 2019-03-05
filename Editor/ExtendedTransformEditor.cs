@@ -63,8 +63,6 @@ namespace Beans.Unity.ETE
 			rotationGUI.Initialize (properties.Rotation, Content.Rotation);
 		}
 
-		float x, y, w, h;
-
 		public override void OnInspectorGUI ()
 		{
 			if (!EditorGUIUtility.wideMode)
@@ -104,13 +102,14 @@ namespace Beans.Unity.ETE
 					properties.Scale.vector3Value = Vector3.one;
 			}
 
+			// I can hard code this b/c the transform inspector is always drawn i nthe same spot lmao
 			var dragRect = new Rect (16, 105, 47, 10);
 
 			using (var check = new EditorGUI.ChangeCheckScope ())
 			{
 				var c = GUI.color;
 				GUI.color = Color.clear;
-				var newScaleX = CustomFloatField.Draw (new Rect (0, 0, 100, 10), dragRect, properties.Scale.vector3Value.x, EditorStyles.numberField);
+				var newScaleX = CustomFloatField.Draw (new Rect (), dragRect, properties.Scale.vector3Value.x, EditorStyles.numberField);
 
 				if (check.changed)
 				{
