@@ -51,6 +51,8 @@ namespace Beans.Unity.ETE
 		private const int MaxDistanceFromOrigin = 100000;
 		private const int ContentWidth = 60;
 
+		private float xyRatio, xzRatio;
+
 		private Properties properties;
 		private TransformRotationGUI rotationGUI;
 
@@ -103,7 +105,15 @@ namespace Beans.Unity.ETE
 			}
 
 			// I can hard code this b/c the transform inspector is always drawn in the same spot lmao
-			var dragRect = new Rect (16, 105, 47, 10);
+			var dragRect = new Rect (16, 105, EditorGUIUtility.labelWidth - 10, 10);
+
+			var e = Event.current;
+			if (dragRect.Contains (e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
+			{
+				var currentScale = properties.Scale.vector3Value;
+				xyRatio = currentScale.y / currentScale.x;
+				xzRatio = currentScale.z / currentScale.x;
+			}
 
 			using (var check = new EditorGUI.ChangeCheckScope ())
 			{
@@ -113,8 +123,15 @@ namespace Beans.Unity.ETE
 
 				if (check.changed)
 				{
+					var currentScale = properties.Scale.vector3Value;
+
 					var delta = newScaleX - properties.Scale.vector3Value.x;
-					properties.Scale.vector3Value *= 1f + delta;
+
+					currentScale.x += delta;
+					currentScale.y += delta * xyRatio;
+					currentScale.z += delta * xzRatio;
+					
+					properties.Scale.vector3Value = currentScale;
 				}
 
 				GUI.color = c;
