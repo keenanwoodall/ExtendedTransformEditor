@@ -158,7 +158,16 @@ namespace Beans.Unity.ETE
 				if (Physics.Raycast (transform.position, Vector3.down, out hit))
 				{
 					Undo.RecordObject (transform, "Snapped To Ground");
-					transform.position = hit.point;
+
+					var renderer = transform.GetComponent<Renderer> ();
+					if (renderer != null)
+					{
+						var bounds = renderer.bounds;
+						var closestPoint = bounds.ClosestPoint (hit.point);
+						transform.position += hit.point - closestPoint;
+					}
+					else
+						transform.position = hit.point;
 				}
 			}
 		}
