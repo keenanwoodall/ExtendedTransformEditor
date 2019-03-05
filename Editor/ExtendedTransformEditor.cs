@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-namespace ExtendedTransformInspector
+namespace Beans.Unity.ETE
 {
 	[CustomEditor (typeof (Transform)), CanEditMultipleObjects]
 	public class ExtendedTransformEditor : Editor

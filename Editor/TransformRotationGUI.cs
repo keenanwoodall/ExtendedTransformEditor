@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 
-namespace ExtendedTransformInspector
+namespace Beans.Unity.ETE
 {
 	/// <summary>
 	/// Abstracts the reflection required to use the internal TransformRotationGUI class.
