@@ -114,7 +114,7 @@ namespace Beans.Unity.ETE
 				if (check.changed)
 				{
 					var delta = newScaleX - properties.Scale.vector3Value.x;
-					properties.Scale.vector3Value += Vector3.one * delta;
+					properties.Scale.vector3Value *= 1f + delta;
 				}
 
 				GUI.color = c;
