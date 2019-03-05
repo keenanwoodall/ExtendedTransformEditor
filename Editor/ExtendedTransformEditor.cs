@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using UnityEditor;
 
 namespace Beans.Unity.ETE
@@ -61,6 +63,8 @@ namespace Beans.Unity.ETE
 			rotationGUI.Initialize (properties.Rotation, Content.Rotation);
 		}
 
+		float x, y, w, h;
+
 		public override void OnInspectorGUI ()
 		{
 			if (!EditorGUIUtility.wideMode)
@@ -100,6 +104,23 @@ namespace Beans.Unity.ETE
 					properties.Scale.vector3Value = Vector3.one;
 			}
 
+			var dragRect = new Rect (16, 105, 47, 10);
+
+			using (var check = new EditorGUI.ChangeCheckScope ())
+			{
+				var c = GUI.color;
+				GUI.color = Color.clear;
+				var newScaleX = CustomFloatField.Draw (new Rect (0, 0, 100, 10), dragRect, properties.Scale.vector3Value.x, EditorStyles.numberField);
+
+				if (check.changed)
+				{
+					var delta = newScaleX - properties.Scale.vector3Value.x;
+					properties.Scale.vector3Value += Vector3.one * delta;
+				}
+
+				GUI.color = c;
+			}
+
 			serializedObject.ApplyModifiedProperties ();
 
 			EditorGUIUtility.labelWidth = 0;
@@ -114,6 +135,37 @@ namespace Beans.Unity.ETE
 				Mathf.Abs (position.z) > MaxDistanceFromOrigin
 			)
 				EditorGUILayout.HelpBox (Content.FloatingPointWarning, MessageType.Warning);
+		}
+
+		[MenuItem ("CONTEXT/Transform/Set Random Rotation")]
+		private static void RandomRotation ()
+		{
+			Undo.SetCurrentGroupName ("Set Random Rotation");
+			foreach (var transform in GetValidSelectedTransforms ())
+			{
+				Undo.RecordObject (transform, "Set Random Rotation");
+				transform.rotation = Random.rotation;
+			}
+		}
+
+		[MenuItem ("CONTEXT/Transform/Snap to Ground")]
+		private static void SnapToGround ()
+		{
+			Undo.SetCurrentGroupName ("Snapped To Ground");
+			foreach (var transform in GetValidSelectedTransforms ())
+			{
+				RaycastHit hit;
+				if (Physics.Raycast (transform.position, Vector3.down, out hit))
+				{
+					Undo.RecordObject (transform, "Snapped To Ground");
+					transform.position = hit.point;
+				}
+			}
+		}
+
+		private static IEnumerable<Transform> GetValidSelectedTransforms ()
+		{
+			return from selection in Selection.gameObjects where !PrefabUtility.IsPartOfPrefabAsset (selection) select selection.transform;
 		}
 	}
 }
