@@ -170,20 +170,31 @@ namespace Beans.Unity.ETE
 			Undo.SetCurrentGroupName ("Snapped To Ground");
 			foreach (var transform in GetValidSelectedTransforms ())
 			{
+				var origin = transform.position;
+				var mf = transform.GetComponent<MeshFilter> ();
+				if (mf != null)
+				{
+					origin = transform.TransformPoint (mf.sharedMesh.bounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
+				}
+				else
+				{
+					var smr = transform.GetComponent<SkinnedMeshRenderer> ();
+					if (smr != null)
+						origin = transform.TransformPoint (smr.localBounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
+				}
+
+				Debug.DrawLine (origin, origin + Vector3.forward * 0.1f);
+				Debug.DrawLine (origin, origin + Vector3.up * 0.1f);
+				Debug.DrawLine (origin, origin + Vector3.right * 0.1f);
+
 				RaycastHit hit;
-				if (Physics.Raycast (transform.position, Vector3.down, out hit))
+				if (Physics.Raycast (origin, Vector3.down, out hit))
 				{
 					Undo.RecordObject (transform, "Snapped To Ground");
-
-					var renderer = transform.GetComponent<Renderer> ();
-					if (renderer != null)
-					{
-						var bounds = renderer.bounds;
-						var closestPoint = bounds.ClosestPoint (hit.point);
-						transform.position += hit.point - closestPoint;
-					}
-					else
-						transform.position = hit.point;
+					Debug.DrawLine (hit.point, hit.point + Vector3.forward * 0.1f);
+					Debug.DrawLine (hit.point, hit.point + Vector3.up * 0.1f);
+					Debug.DrawLine (hit.point, hit.point + Vector3.right * 0.1f);
+					transform.position += hit.point - origin;
 				}
 			}
 		}
