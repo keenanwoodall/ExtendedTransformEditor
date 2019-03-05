@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
-using System.Reflection;
-using System;
 
 namespace ExtendedTransformInspector
 {
@@ -33,28 +30,18 @@ namespace ExtendedTransformInspector
 		}
 
 		private const int MaxDistanceFromOrigin = 100000;
+		private const int ContentWidth = 60;
 
 		private Properties properties;
-
-		private object rotationGUI;
-		private MethodInfo rotationGUIOnEnable;
-		private MethodInfo rotationGUIRotationField;
+		private TransformRotationGUI rotationGUI;
 
 		private void OnEnable ()
 		{
 			properties = new Properties (serializedObject);
 
 			if (rotationGUI == null)
-			{
-				var type = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
-
-				rotationGUIOnEnable = type.GetMethod ("OnEnable");
-				rotationGUIRotationField = type.GetMethod ("RotationField", new Type[] { });
-
-				rotationGUI = Activator.CreateInstance (type);
-			}
-
-			rotationGUIOnEnable.Invoke (rotationGUI, new object[] { properties.Rotation, Content.Rotation });
+				rotationGUI = new TransformRotationGUI ();
+			rotationGUI.Initialize (properties.Rotation, Content.Rotation);
 		}
 
 		public override void OnInspectorGUI ()
@@ -68,10 +55,12 @@ namespace ExtendedTransformInspector
 			serializedObject.UpdateIfRequiredOrScript ();
 
 			EditorGUILayout.PropertyField (properties.Position, Content.Position);
-			rotationGUIRotationField.Invoke (rotationGUI, null);
+			rotationGUI.Draw ();
 			EditorGUILayout.PropertyField (properties.Scale, Content.Scale);
 
 			serializedObject.ApplyModifiedProperties ();
+
+			EditorGUIUtility.labelWidth = 0;
 
 			var transform = target as Transform;
 			var position = transform.position;
