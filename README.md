@@ -1,4 +1,4 @@
-# Extended Transform Inspector
+#Extended Transform Editor
 
 An extended version of the default Transform editor with no wasted space.
 
