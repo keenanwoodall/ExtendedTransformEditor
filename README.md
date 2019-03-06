@@ -7,3 +7,7 @@ An extended version of the default Transform editor with no wasted space.
 - You can snap the selected transforms to the ground or set a random rotation from the contex menu.
 
 ![1](https://i.imgur.com/7mQTC00.gif)
+
+TODO:
+- Fix euler angles display to show `0, 0, 0` when reset
+- Fix physics snapping on terrain
