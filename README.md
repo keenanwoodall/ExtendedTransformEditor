@@ -9,5 +9,5 @@ An extended version of the default Transform editor with no wasted space.
 ![1](https://i.imgur.com/7mQTC00.gif)
 
 TODO:
-- Fix euler angles display to *always* show `0, 0, 0` when reset
+- ~~Fix euler angles display to *always* show `0, 0, 0` when reset~~ Thanks [@karsion](https://github.com/karsion) for the solution
 - Fix physics snapping on terrain
