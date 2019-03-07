@@ -13,17 +13,22 @@ namespace Beans.Unity.ETE
 		private object transformRotationGUI;
 		private MethodInfo onEnable;
 		private MethodInfo rotationField;
+		private MethodInfo setLocalEulerAngles;
+
+		private SerializedProperty property;
 
 		public TransformRotationGUI ()
 		{
 			if (transformRotationGUI == null)
 			{
-				var type = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
+				var unityEditorType = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
+				var transformType = typeof (Transform);
 
-				onEnable = type.GetMethod ("OnEnable");
-				rotationField = type.GetMethod ("RotationField", new Type[] { });
+				onEnable = unityEditorType.GetMethod ("OnEnable");
+				rotationField = unityEditorType.GetMethod ("RotationField", new Type[] { });
+				setLocalEulerAngles = transformType.GetMethod ("SetLocalEulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
 
-				transformRotationGUI = Activator.CreateInstance (type);
+				transformRotationGUI = Activator.CreateInstance (unityEditorType);
 			}
 		}
 
@@ -34,6 +39,7 @@ namespace Beans.Unity.ETE
 		/// <param name="content">The content to draw the property with.</param>
 		public void Initialize (SerializedProperty property, GUIContent content)
 		{
+			this.property = property;
 			onEnable.Invoke (transformRotationGUI, new object[] { property, content });
 		}
 
@@ -43,6 +49,16 @@ namespace Beans.Unity.ETE
 		public void Draw ()
 		{
 			rotationField.Invoke (transformRotationGUI, null);
+		}
+
+		public void Reset ()
+		{
+			var targets = property.serializedObject.targetObjects;
+			var parameters = new object[] { Vector3.zero, 0 };
+
+			Undo.RecordObjects (targets, "Reset Rotation");
+			foreach (var target in targets)
+				setLocalEulerAngles.Invoke (target, parameters);
 		}
 	}
 }

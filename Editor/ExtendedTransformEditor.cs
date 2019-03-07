@@ -86,7 +86,7 @@ namespace Beans.Unity.ETE
 				rotationGUI.Draw ();
 				if (GUILayout.Button (Content.ResetRotation, Styles.ResetButton))
 				{
-					properties.Rotation.quaternionValue = Quaternion.identity;
+					rotationGUI.Reset ();
 					if (Tools.current == Tool.Rotate)
 					{
 						if (Tools.pivotRotation == PivotRotation.Global)
@@ -166,14 +166,11 @@ namespace Beans.Unity.ETE
 		private static void SnapToGround (MenuCommand command)
 		{
 			var transform = command.context as Transform;
-
-			Undo.SetCurrentGroupName ("Snapped To Ground");
 			var origin = transform.position;
+
 			var mf = transform.GetComponent<MeshFilter> ();
 			if (mf != null)
-			{
 				origin = transform.TransformPoint (mf.sharedMesh.bounds.ClosestPoint (transform.InverseTransformPoint (transform.position + Vector3.down * 1000)));
-			}
 			else
 			{
 				var smr = transform.GetComponent<SkinnedMeshRenderer> ();
@@ -192,38 +189,56 @@ namespace Beans.Unity.ETE
 		[MenuItem ("CONTEXT/Transform/Snap to Ground (Physics)")]
 		private static void SnapToGroundPhysics (MenuCommand command)
 		{
+			// Get the selected transform
 			var transform = command.context as Transform;
-
-			Undo.SetCurrentGroupName ("Snapped To Ground");
 			var origin = transform.position;
 
 			RaycastHit hit;
+			// Shoot a ray directly down
 			if (Physics.Raycast (origin, Vector3.down, out hit))
 			{
 				Undo.RecordObject (transform, "Snapped To Ground");
 
-				transform.position += hit.point - origin;
+				// Draw a point where the ray hit for debugging
+				DrawDebugPoint (hit.point);
 
+				// If the selected transform has a collider
 				var collider = transform.GetComponent<Collider> ();
 				if (collider != null)
 				{
+					// Compute the movement required to resolve any penetration
 					var direction = Vector3.up;
 					var distance = 0f;
-					Physics.ComputePenetration
+					if (Physics.ComputePenetration
 					(
 						colliderA: collider,
-						positionA: transform.position,
+						positionA: hit.point,
 						rotationA: transform.rotation,
 						colliderB: hit.collider,
 						positionB: hit.transform.position,
 						rotationB: hit.transform.rotation,
 						direction: out direction,
 						distance: out distance
-					);
+					))
+					{
+						// Draw the movement vector
+						Debug.DrawRay (hit.point, direction * distance, Color.yellow, 5f);
 
-					transform.position += direction * distance;
+						// Apply the movement
+						transform.position = hit.point + (direction * distance);
+					}
+					else
+						// There wasn't any penetration so the transform cant jump directly to the hit point
+						transform.position = hit.point;
 				}
 			}
+		}
+
+		private static void DrawDebugPoint (Vector3 point)
+		{
+			Debug.DrawRay (point, Vector3.forward * 0.05f, Color.blue, 5f, true);
+			Debug.DrawRay (point, Vector3.right * 0.05f, Color.red, 5f, true);
+			Debug.DrawRay (point, Vector3.up * 0.05f, Color.green, 5f, true);
 		}
 	}
 }
