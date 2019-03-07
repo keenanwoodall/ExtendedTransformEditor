@@ -10,4 +10,4 @@ An extended version of the default Transform editor with no wasted space.
 
 TODO:
 - ~~Fix euler angles display to *always* show `0, 0, 0` when reset~~ Thanks [@karsion](https://github.com/karsion) for the [solution](https://github.com/keenanwoodall/ExtendedTransformEditor/issues/1)
-- Fix physics snapping on terrain
+- Improve surface snapping.
