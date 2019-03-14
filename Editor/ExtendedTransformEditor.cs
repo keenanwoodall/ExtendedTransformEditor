@@ -79,30 +79,33 @@ namespace Beans.Unity.ETE
 			using (new EditorGUILayout.HorizontalScope ())
 			{
 				EditorGUILayout.PropertyField (properties.Position, Content.Position);
-				if (GUILayout.Button (Content.ResetPosition, Styles.ResetButton))
-					properties.Position.vector3Value = Vector3.zero;
+				using (new EditorGUI.DisabledGroupScope (properties.Position.vector3Value == Vector3.zero))
+					if (GUILayout.Button (Content.ResetPosition, Styles.ResetButton))
+						properties.Position.vector3Value = Vector3.zero;
 			}
 			using (new EditorGUILayout.HorizontalScope ())
 			{
 				rotationGUI.Draw ();
-				if (GUILayout.Button (Content.ResetRotation, Styles.ResetButton))
-				{
-					rotationGUI.Reset ();
-					if (Tools.current == Tool.Rotate)
+				using (new EditorGUI.DisabledGroupScope (rotationGUI.eulerAngles == Vector3.zero))
+					if (GUILayout.Button (Content.ResetRotation, Styles.ResetButton))
 					{
-						if (Tools.pivotRotation == PivotRotation.Global)
+						rotationGUI.Reset ();
+						if (Tools.current == Tool.Rotate)
 						{
-							Tools.handleRotation = Quaternion.identity;
-							SceneView.RepaintAll ();
+							if (Tools.pivotRotation == PivotRotation.Global)
+							{
+								Tools.handleRotation = Quaternion.identity;
+								SceneView.RepaintAll ();
+							}
 						}
 					}
-				}
 			}
 			using (new EditorGUILayout.HorizontalScope ())
 			{
 				EditorGUILayout.PropertyField (properties.Scale, Content.Scale);
-				if (GUILayout.Button (Content.ResetScale, Styles.ResetButton))
-					properties.Scale.vector3Value = Vector3.one;
+				using (new EditorGUI.DisabledGroupScope (properties.Scale.vector3Value == Vector3.one))
+					if (GUILayout.Button (Content.ResetScale, Styles.ResetButton))
+						properties.Scale.vector3Value = Vector3.one;
 			}
 
 			// I can hard code this b/c the transform inspector is always drawn in the same spot lmao

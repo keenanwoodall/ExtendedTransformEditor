@@ -11,24 +11,28 @@ namespace Beans.Unity.ETE
 	public class TransformRotationGUI
 	{
 		private object transformRotationGUI;
-		private MethodInfo onEnable;
-		private MethodInfo rotationField;
-		private MethodInfo setLocalEulerAngles;
+		private FieldInfo eulerAnglesField;
+		private MethodInfo onEnableMethod;
+		private MethodInfo rotationFieldMethod;
+		private MethodInfo setLocalEulerAnglesMethod;
 
 		private SerializedProperty property;
+
+		public Vector3 eulerAngles => (Vector3)eulerAnglesField.GetValue (transformRotationGUI);
 
 		public TransformRotationGUI ()
 		{
 			if (transformRotationGUI == null)
 			{
-				var unityEditorType = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
+				var transformRotationGUIType = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
 				var transformType = typeof (Transform);
 
-				onEnable = unityEditorType.GetMethod ("OnEnable");
-				rotationField = unityEditorType.GetMethod ("RotationField", new Type[] { });
-				setLocalEulerAngles = transformType.GetMethod ("SetLocalEulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
+				eulerAnglesField = transformRotationGUIType.GetField ("m_EulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
+				onEnableMethod = transformRotationGUIType.GetMethod ("OnEnable");
+				rotationFieldMethod = transformRotationGUIType.GetMethod ("RotationField", new Type[] { });
+				setLocalEulerAnglesMethod = transformType.GetMethod ("SetLocalEulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
 
-				transformRotationGUI = Activator.CreateInstance (unityEditorType);
+				transformRotationGUI = Activator.CreateInstance (transformRotationGUIType);
 			}
 		}
 
@@ -40,7 +44,7 @@ namespace Beans.Unity.ETE
 		public void Initialize (SerializedProperty property, GUIContent content)
 		{
 			this.property = property;
-			onEnable.Invoke (transformRotationGUI, new object[] { property, content });
+			onEnableMethod.Invoke (transformRotationGUI, new object[] { property, content });
 		}
 
 		/// <summary>
@@ -48,7 +52,7 @@ namespace Beans.Unity.ETE
 		/// </summary>
 		public void Draw ()
 		{
-			rotationField.Invoke (transformRotationGUI, null);
+			rotationFieldMethod.Invoke (transformRotationGUI, null);
 		}
 
 		public void Reset ()
@@ -58,7 +62,7 @@ namespace Beans.Unity.ETE
 
 			Undo.RecordObjects (targets, "Reset Rotation");
 			foreach (var target in targets)
-				setLocalEulerAngles.Invoke (target, parameters);
+				setLocalEulerAnglesMethod.Invoke (target, parameters);
 		}
 	}
 }
