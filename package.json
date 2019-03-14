@@ -6,11 +6,10 @@
     "unity": "2018.3",
     "description": "A clutterless custom Transform editor.",
     "category": "Unity",
-    "keywords": 
-    [
+    "keywords": [
         "transform",
         "editor",
         "extension"
     ],
-    "dependencies": { }
+    "dependencies": {}
 }
