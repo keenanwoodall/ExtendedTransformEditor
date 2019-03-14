@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace Beans.Unity.ETE
@@ -10,7 +8,7 @@ namespace Beans.Unity.ETE
 	{
 		private class Content
 		{
-			public static Texture2D ResetTexture = Resources.Load<Texture2D> (EditorGUIUtility.isProSkin ? "Textures/ETE_Pro_Reset" : "Textures/ETE_Personal_Reset");
+			public static Texture2D ResetTexture = AssetDatabasex.LoadAssetOfType<Texture2D> (EditorGUIUtility.isProSkin ? "ETE_Pro_Reset" : "ETE_Personal_Reset");
 
 			public static readonly GUIContent Position	= new GUIContent ("Position", "The local position of this GameObject relative to the parent.");
 			public static readonly GUIContent Rotation	= new GUIContent ("Rotation", "The local rotation of this Game Object relative to the parent.");
@@ -24,13 +22,16 @@ namespace Beans.Unity.ETE
 
 		private class Styles
 		{
-			public static GUISkin Skin;
 			public static GUIStyle ResetButton;
 
 			static Styles ()
 			{
-				Skin = Resources.Load<GUISkin> ("ETE");
-				ResetButton = Skin.GetStyle ("button");
+				ResetButton = new GUIStyle ()
+				{
+					margin = new RectOffset (0, 0, 2, 0),
+					fixedWidth = 15,
+					fixedHeight = 15
+				};
 			}
 		}
 
@@ -179,13 +180,6 @@ namespace Beans.Unity.ETE
 		private static bool ValidateSnapToGroundPhysics (MenuCommand command)
 		{
 			return ((Transform)command.context).GetComponent<Collider> () != null;
-		}
-
-		private static void DrawDebugPoint (Vector3 point)
-		{
-			Debug.DrawRay (point, Vector3.forward * 0.05f, Color.blue, 5f, true);
-			Debug.DrawRay (point, Vector3.right * 0.05f, Color.red, 5f, true);
-			Debug.DrawRay (point, Vector3.up * 0.05f, Color.green, 5f, true);
 		}
 	}
 }
