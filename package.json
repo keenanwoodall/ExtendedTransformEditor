@@ -1,0 +1,16 @@
+{
+    "name": "com.beans.ete",
+    "author": "Keenan Woodall",
+    "displayName": "Extended Transform Editor",
+    "version": "1.0.1",
+    "unity": "2018.3",
+    "description": "A clutterless custom Transform editor.",
+    "category": "Unity",
+    "keywords": 
+    [
+        "transform",
+        "editor",
+        "extension"
+    ],
+    "dependencies": { }
+}
