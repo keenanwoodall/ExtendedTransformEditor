@@ -1,5 +1,7 @@
 # Extended Transform Editor
 
+WARNING - Might not work with the editor GUI redesign
+
 An extended version of the default Transform editor with no wasted space.
 
 - The scale can be uniformly changed by dragging on the "Scale" label as if it was a float field.
