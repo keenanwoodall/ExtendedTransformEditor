@@ -13,6 +13,11 @@ namespace Beans.Unity.ETE
 			public static readonly GUIContent Position	= new GUIContent ("Position", "The local position of this GameObject relative to the parent.");
 			public static readonly GUIContent Rotation	= new GUIContent ("Rotation", "The local rotation of this Game Object relative to the parent.");
 			public static readonly GUIContent Scale		= new GUIContent ("Scale", "The local scaling of this GameObject relative to the parent.");
+			public static readonly GUIContent WorldPosition	= new GUIContent ("Position", "The world position of this GameObject.");
+			public static readonly GUIContent WorldRotation	= new GUIContent ("Rotation", "The world rotation of this Game Object.");
+			public static readonly GUIContent WorldScale	= new GUIContent ("Scale", "The world scaling of this GameObject.");
+			
+			public static readonly GUIContent WorldSpace	= new GUIContent ("World Space");
 			public static readonly GUIContent ResetPosition = new GUIContent (ResetTexture, "Reset the position.");
 			public static readonly GUIContent ResetRotation = new GUIContent (ResetTexture, "Reset the rotation.");
 			public static readonly GUIContent ResetScale = new GUIContent (ResetTexture, "Reset the scale.");
@@ -56,6 +61,7 @@ namespace Beans.Unity.ETE
 
 		private Properties properties;
 		private TransformRotationGUI rotationGUI;
+		private string worldSpaceKey;
 
 		private void OnEnable ()
 		{
@@ -64,6 +70,8 @@ namespace Beans.Unity.ETE
 			if (rotationGUI == null)
 				rotationGUI = new TransformRotationGUI ();
 			rotationGUI.Initialize (properties.Rotation, Content.Rotation);
+
+			worldSpaceKey = $"{target.GetInstanceID()}.WorldSpace";
 		}
 
 		public override void OnInspectorGUI ()
@@ -109,7 +117,12 @@ namespace Beans.Unity.ETE
 			}
 
 			// I can hard code this b/c the transform inspector is always drawn in the same spot lmao
+#if !UNITY_2019_4_OR_NEWER // not tested before Unity 2019.4
 			var dragRect = new Rect (16, 105, EditorGUIUtility.labelWidth - 10, 10);
+#else
+			var lastRect = GUILayoutUtility.GetLastRect();
+			var dragRect = new Rect(0, lastRect.yMin, EditorGUIUtility.labelWidth, lastRect.height);
+#endif
 
 			var e = Event.current;
 			if (dragRect.Contains (e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
@@ -155,6 +168,21 @@ namespace Beans.Unity.ETE
 				Mathf.Abs (position.z) > MaxDistanceFromOrigin
 			)
 				EditorGUILayout.HelpBox (Content.FloatingPointWarning, MessageType.Warning);
+			
+			var worldSpace = EditorPrefs.GetBool(worldSpaceKey);
+			if(worldSpace != EditorGUILayout.Foldout(worldSpace, Content.WorldSpace, true, EditorStyles.foldout))
+			{
+				worldSpace = !worldSpace;
+				EditorPrefs.SetBool(worldSpaceKey, worldSpace);
+			}
+			if(worldSpace)
+			{
+				GUI.enabled = false;
+				EditorGUILayout.Vector3Field(Content.WorldPosition, transform.position);
+				EditorGUILayout.Vector3Field(Content.WorldRotation, transform.rotation.eulerAngles);
+				EditorGUILayout.Vector3Field(Content.WorldScale, transform.lossyScale);
+				GUI.enabled = true;
+			}
 		}
 
 		[MenuItem ("CONTEXT/Transform/Set Random Rotation")]
