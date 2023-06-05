@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if UNITY_2022_3_OR_NEWER
+#define EULER_AS_ARRAY
+#endif
+
+using System;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor;
@@ -18,22 +22,41 @@ namespace Beans.Unity.ETE
 
 		private SerializedProperty property;
 
-		public Vector3 eulerAngles => (Vector3)eulerAnglesField.GetValue (transformRotationGUI);
+		public Vector3 eulerAngles
+		{
+			get
+			{
+#if EULER_AS_ARRAY
+				var numberFieldType = eulerAnglesField.FieldType.GetElementType();
+				var doubleValField = numberFieldType.GetField("doubleVal", BindingFlags.Public | BindingFlags.Instance);
+				var eulerValues = (Array)eulerAnglesField.GetValue(transformRotationGUI);
+				return new Vector3
+				(
+					(float)(double)doubleValField.GetValue(eulerValues.GetValue(0)), 
+					(float)(double)doubleValField.GetValue(eulerValues.GetValue(1)),
+					(float)(double)doubleValField.GetValue(eulerValues.GetValue(2))
+				);
+#else
+				return (Vector3)eulerAnglesField.GetValue(transformRotationGUI);
+#endif
+			}
+		}
 
 		public TransformRotationGUI ()
 		{
-			if (transformRotationGUI == null)
-			{
-				var transformRotationGUIType = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
-				var transformType = typeof (Transform);
+			var transformRotationGUIType = Type.GetType ("UnityEditor.TransformRotationGUI,UnityEditor");
+			var transformType = typeof (Transform);
 
-				eulerAnglesField = transformRotationGUIType.GetField ("m_EulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
-				onEnableMethod = transformRotationGUIType.GetMethod ("OnEnable");
-				rotationFieldMethod = transformRotationGUIType.GetMethod ("RotationField", new Type[] { });
-				setLocalEulerAnglesMethod = transformType.GetMethod ("SetLocalEulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
+#if EULER_AS_ARRAY
+			eulerAnglesField = transformRotationGUIType.GetField ("m_EulerFloats", BindingFlags.Instance | BindingFlags.NonPublic);
+#else
+			eulerAnglesField = transformRotationGUIType.GetField ("m_EulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
+#endif
+			onEnableMethod = transformRotationGUIType.GetMethod ("OnEnable");
+			rotationFieldMethod = transformRotationGUIType.GetMethod ("RotationField", new Type[] { });
+			setLocalEulerAnglesMethod = transformType.GetMethod ("SetLocalEulerAngles", BindingFlags.Instance | BindingFlags.NonPublic);
 
-				transformRotationGUI = Activator.CreateInstance (transformRotationGUIType);
-			}
+			transformRotationGUI = Activator.CreateInstance (transformRotationGUIType);
 		}
 
 		/// <summary>
