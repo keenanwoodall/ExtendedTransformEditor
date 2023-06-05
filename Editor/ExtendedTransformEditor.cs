@@ -109,7 +109,11 @@ namespace Beans.Unity.ETE
 			}
 
 			// I can hard code this b/c the transform inspector is always drawn in the same spot lmao
+#if UNITY_2022_3_OR_NEWER
+			var dragRect = new Rect (16, 47, EditorGUIUtility.labelWidth - 10, 10);
+#else
 			var dragRect = new Rect (16, 105, EditorGUIUtility.labelWidth - 10, 10);
+#endif
 
 			var e = Event.current;
 			if (dragRect.Contains (e.mousePosition) && e.type == EventType.MouseDown && e.button == 0)
